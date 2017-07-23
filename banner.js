@@ -1,11 +1,8 @@
 var AV = require('leanengine');
 
-/**
- * 一个简单的云代码方法
- */
 var Banner = AV.Object.extend('Banner');
 
-AV.Cloud.define('saveBanner', function(request) {
+AV.Cloud.define('SaveBanner', function(request) {
 	var banner = new Banner();
 	banner.set('title',request.params.title);
 	banner.set('link',request.params.link);
@@ -15,13 +12,4 @@ AV.Cloud.define('saveBanner', function(request) {
 	},function(error){
 		console.error(error);
 	});
-});
-
-AV.Cloud.define('getBanner', function(request) {
-  var query = new AV.Query(Banner);
-  return query.find().then(function(results) {
-    return results;
-  }).catch(function(error) {
-    throw new AV.Cloud.Error('查询失败');
-  });
 });
