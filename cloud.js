@@ -46,7 +46,32 @@ AV.Cloud.define('savePlace',function(request){
 });
 
 AV.Cloud.define('getPlaces',function(request){
-	var query = new AV.Query(Place);
+	var query;
+	if (request.params.category == '校园建筑') {
+		var officeQuery = new AV.Query(Place);
+		var playgroundQuery  = new AV.Query(Place);
+		var houseQuery = new AV.Query(Place);
+		var bridgeQuery = new AV.Query(Place);
+		var doorwayQuery = new AV.Query(Place);
+		officeQuery.equalTo('placeType','office');
+		playgroundQuery.equalTo('placeType','playground');
+		houseQuery.equalTo('placeType','house');
+		bridgeQuery.equalTo('placeType','bridge');
+		doorwayQuery.equalTo('placeType','doorway');
+		query = AV.Query.or(officeQuery, playgroundQuery,houseQuery,bridgeQuery,doorwayQuery);
+	}else if (request.params.category == '美食') {
+		var foodQuery = new AV.Query(Place);
+		foodQuery.equalTo('placeType','food');
+		query = foodQuery;
+	}else if (request.params.category == '购物') {
+		var shopQuery = new AV.Query(Place);
+		shopQuery.equalTo('placeType','shop');
+		query = shopQuery;
+	}else{
+		var organizationQuery = new AV.Query(Place);
+		organizationQuery.equalTo('placeType','organization');
+		query = organizationQuery
+	}
 	return query.find().then(function(results) {
     return results;
   }).catch(function(error) {
