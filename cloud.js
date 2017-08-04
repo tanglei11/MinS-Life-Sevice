@@ -119,6 +119,8 @@ AV.Cloud.define('saveDynamic',function(request){
 AV.Cloud.define('getDynamics',function(request) {
 	return new Promise(async(function(next, fail) {
 		var _query = new AV.Query(Dynamic) ;
+		_query.limit(request.params.limit);
+  		_query.skip(request.params.skip);
 		var _list = await(_query.find()) ;
 		for(var i = 0; i < _list.length; i++) {
 			var _item = _list[i] ;
