@@ -5,6 +5,25 @@ var AV = require('leanengine');
  */
 var Banner = AV.Object.extend('Banner');
 var Place = AV.Object.extend('Place');
+var Dynamic = AV.Object.extend('Dynamic');
+var User = AV.Object.extend('User');
+
+async = require('asyncawait').async ;
+await = require('asyncawait').await ;
+
+//---------------------------------------------------公共方法
+
+//关联用户查询方法
+function _get_userinfo(userid) {
+	return new Promise(async(function(next, fail) {
+		var _query = new AV.Query(User) ;
+		await(_query.equalTo('objectId', userid)) ;
+		var _user = await(_query.first()) ;
+		next(_user) ;
+	})) ;
+}
+
+//---------------------------------------------------云函数
 
 AV.Cloud.define('saveBanner', function(request) {
 	var banner = new Banner();
@@ -77,4 +96,35 @@ AV.Cloud.define('getPlaces',function(request){
   }).catch(function(error) {
     throw new AV.Cloud.Error('查询失败');
   });
+});
+
+//保存动态
+AV.Cloud.define('saveDynamic',function(request){
+	var dynamic = new Dynamic();
+	dynamic.set('content',request.params.content);
+	dynamic.set('imgs',request.params.imgs);
+	dynamic.set('addressName',request.params.addressName);
+	dynamic.set('address',request.params.address);
+	dynamic.set('latitude',request.params.latitude);
+	dynamic.set('longitude',request.params.longitude);
+	dynamic.set('userId',request.params.userId);
+	dynamic.save().then(function(dyn){
+		console.log('objectId is' + dyn.id);
+	},function(error){
+		console.error(error);
+	});
+});
+
+//获取动态
+AV.Cloud.define('getDynamics',function(request) {
+	return new Promise(async(function(next, fail) {
+		var _query = new AV.Query(Dynamic) ;
+		var _list = await(_query.find()) ;
+		for(var i = 0; i < _list.length; i++) {
+			var _item = _list[i] ;
+			var _user = await(_get_userinfo(_item.get('userId'))) ;
+			_item.set('user', {"objectId":_user.get("objectId"),"username":_user.get('username'),"nickname":_user.get('nickname'),"profileUrl":_user.get('profileUrl')}) ;
+		}
+		next(_list) ;
+	})) ;
 });
