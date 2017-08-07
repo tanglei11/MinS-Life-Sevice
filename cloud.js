@@ -24,6 +24,28 @@ function _get_userinfo(userid) {
 	})) ;
 }
 
+//关联收藏查询方法
+function _get_isCollect(currectUserId,dynamicId,collectType){
+	return new Promise(async(function(next,fail){
+		var userQuery = new AV.Query(Collect);
+		userQuery.equalTo('collectUserId',currectUserId);
+		var typeQuery = new AV.Query(Collect);
+		typeQuery.equalTo('collectType',collectType);
+		var query = AV.Query.and(userQuery, typeQuery);
+		var collectList = await(query.find());
+		var isCollect = '0';
+		for (var i = 0; i < collectList.length; i++) {
+			var collectItem = collectList[i];
+			console.log(collectItem.get('dynamicId') + '-------' + dynamicId);
+			if (dynamicId == collectItem.get('dynamicId')) {
+				isCollect = '1';
+				break;
+			}
+		}
+		next(isCollect);
+	}));
+}
+
 //---------------------------------------------------云函数
 
 AV.Cloud.define('saveBanner', function(request) {
@@ -127,7 +149,10 @@ AV.Cloud.define('getDynamics',function(request) {
 		for(var i = 0; i < _list.length; i++) {
 			var _item = _list[i] ;
 			var _user = await(_get_userinfo(_item.get('userId'))) ;
+			var is_collect = await(_get_isCollect(request.params.currectUserId,_item.get('objectId'),'dynamic'));
+			// console.log(is_collect);
 			_item.set('user', {"objectId":_user.get("objectId"),"username":_user.get('username'),"nickname":_user.get('nickname'),"profileUrl":_user.get('profileUrl')}) ;
+			_item.set('isCollect',is_collect);
 		}
 		next(_list) ;
 	})) ;
