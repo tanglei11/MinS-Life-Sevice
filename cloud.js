@@ -7,6 +7,7 @@ var Banner = AV.Object.extend('Banner');
 var Place = AV.Object.extend('Place');
 var Dynamic = AV.Object.extend('Dynamic');
 var User = AV.Object.extend('User');
+var Collect	= AV.Object.extend('Collect');
 
 async = require('asyncawait').async ;
 await = require('asyncawait').await ;
@@ -130,4 +131,17 @@ AV.Cloud.define('getDynamics',function(request) {
 		}
 		next(_list) ;
 	})) ;
+});
+
+//保存收藏
+AV.Cloud.define('saveCollect',function(request){
+	var collect = new Collect();
+	collect.set('dynamicId',request.params.dynamicId);
+	collect.set('collectUserId',request.params.collectUserId);
+	collect.set('collectType',request.params.collectType);
+	collect.save().then(function(clt){
+		console.log('objectId is ' + clt.id);
+	},function(error){
+		console.error(error);
+	});
 });
