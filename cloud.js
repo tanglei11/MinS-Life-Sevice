@@ -170,3 +170,21 @@ AV.Cloud.define('saveCollect',function(request){
 		console.error(error);
 	});
 });
+
+//取消收藏
+AV.Cloud.define('deleteCollect',function(request){
+	console.log(request.params.dynamicId);
+	var query = new AV.Query(Collect) ;
+	query.equalTo('dynamicId', request.params.dynamicId) ;
+	query.first().then(function (data) {
+		data.destroy().then(function (success) {
+			// console.log('11111');
+    		// 删除成功
+  		}, function (error) {
+  			// console.log('22222');
+    		// 删除失败
+  		});
+	}, function (error) {
+		
+	});
+});
