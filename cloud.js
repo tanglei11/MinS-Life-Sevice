@@ -8,6 +8,7 @@ var Place = AV.Object.extend('Place');
 var Dynamic = AV.Object.extend('Dynamic');
 var User = AV.Object.extend('User');
 var Collect	= AV.Object.extend('Collect');
+var Comment = AV.Object.extend('Comment');
 
 async = require('asyncawait').async ;
 await = require('asyncawait').await ;
@@ -186,5 +187,23 @@ AV.Cloud.define('deleteCollect',function(request){
   		});
 	}, function (error) {
 		
+	});
+});
+
+//保存评论
+AV.Cloud.define('saveComment',function(request){
+	var comment = new Comment();
+	comment.set('commentUserId',request.params.commentUserId);
+	comment.set('commentUserName',request.params.commentUserName);
+	comment.set('commentUserProfileUrl',request.params.commentUserProfileUrl);
+	comment.set('beCommentUserId',request.params.beCommentUserId);
+	comment.set('beCommentUserName',request.params.beCommentUserName);
+	comment.set('commentContent',request.params.commentContent);
+	comment.set('commentType',request.params.commentType);
+	comment.set('commentStatus','0');
+	comment.save().then(function(cmt){
+		console.log('objectId is ' + cmt.id);
+	},function(error){
+		console.error(error);
 	});
 });
