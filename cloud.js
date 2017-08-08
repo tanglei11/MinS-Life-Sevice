@@ -216,6 +216,9 @@ AV.Cloud.define('getComments',function(request){
 	var typeQuery = new AV.Query(Comment);
 	typeQuery.equalTo('commentType',request.params.commentType);
 	var query = AV.Query.and(relationQuery, typeQuery);
+	query.limit(request.params.limit);
+  	query.skip(request.params.skip);
+  	query.descending('createdAt');
 	return query.find().then(function(results) {
     	return results;
   	}).catch(function(error) {
