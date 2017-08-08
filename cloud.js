@@ -208,3 +208,17 @@ AV.Cloud.define('saveComment',function(request){
 		console.error(error);
 	});
 });
+
+//获取评论列表
+AV.Cloud.define('getComments',function(request){
+	var relationQuery = new AV.Query(Comment);
+	relationQuery.equalTo('relationId',request.params.relationId);
+	var typeQuery = new AV.Query(Comment);
+	typeQuery.equalTo('commentType',request.params.commentType);
+	var query = AV.Query.and(relationQuery, typeQuery);
+	return query.find().then(function(results) {
+    	return results;
+  	}).catch(function(error) {
+    	throw new AV.Cloud.Error('查询失败');
+  });
+});
