@@ -132,6 +132,8 @@ AV.Cloud.define('saveDynamic',function(request){
 	dynamic.set('latitude',request.params.latitude);
 	dynamic.set('longitude',request.params.longitude);
 	dynamic.set('userId',request.params.userId);
+	dynamic.set('likeCount',0);
+	dynamic.set('commentCount',0);
 	dynamic.save().then(function(dyn){
 		console.log('objectId is' + dyn.id);
 	},function(error){
@@ -204,6 +206,20 @@ AV.Cloud.define('saveComment',function(request){
 	comment.set('commentStatus','0');
 	comment.save().then(function(cmt){
 		console.log('objectId is ' + cmt.id);
+		if (request.params.commentType == 'dynamic') {
+			var query = new AV.Query(Dynamic) ;
+			query.equalTo('objectId',request.params.relationId);
+			query.first().then(function (data) {
+				var dynamic = data;
+				console.log('========' + dynamic);
+				var commentCount = dynamic.get('commentCount');
+				commentCount = commentCount + 1;
+				dynamic.set('commentCount',commentCount);
+				dynamic.save();
+			}, function (error) {
+		
+			});
+		}
 	},function(error){
 		console.error(error);
 	});
