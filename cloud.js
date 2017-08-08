@@ -193,6 +193,7 @@ AV.Cloud.define('deleteCollect',function(request){
 //保存评论
 AV.Cloud.define('saveComment',function(request){
 	var comment = new Comment();
+	comment.set('relationId',request.params.relationId);
 	comment.set('commentUserId',request.params.commentUserId);
 	comment.set('commentUserName',request.params.commentUserName);
 	comment.set('commentUserProfileUrl',request.params.commentUserProfileUrl);
