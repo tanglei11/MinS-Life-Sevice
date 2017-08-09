@@ -259,7 +259,11 @@ AV.Cloud.define('deleteComment',function(request){
 					var dynamic = dycData;
 					console.log('========' + dynamic);
 					var commentCount = dynamic.get('commentCount');
-					commentCount = commentCount - 1;
+					if (commentCount == 0) {
+
+					}else{
+						commentCount = commentCount - 1;
+					}
 					dynamic.set('commentCount',commentCount);
 					dynamic.save();
 				}, function (error) {
