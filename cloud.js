@@ -204,7 +204,8 @@ AV.Cloud.define('saveComment',function(request){
 	comment.set('commentContent',request.params.commentContent);
 	comment.set('commentType',request.params.commentType);
 	comment.set('commentStatus','0');
-	comment.save().then(function(cmt){
+	return comment.save().then(function(cmt){
+		return {"commentId":cmt.id};
 		console.log('objectId is ' + cmt.id);
 		if (request.params.commentType == 'dynamic') {
 			var query = new AV.Query(Dynamic) ;
