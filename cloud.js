@@ -204,19 +204,25 @@ AV.Cloud.define('saveComment',function(request){
 	comment.set('commentContent',request.params.commentContent);
 	comment.set('commentType',request.params.commentType);
 	comment.set('commentStatus','0');
-	return comment.save().then(function(cmt){
-		return {"commentId":cmt.id};
-		console.log('objectId is ' + cmt.id);
+	comment.save().then(function(cmt){
 		if (request.params.commentType == 'dynamic') {
+			console.log('进来了');
 			var query = new AV.Query(Dynamic) ;
 			query.equalTo('objectId',request.params.relationId);
 			query.first().then(function (data) {
 				var dynamic = data;
 				console.log('========' + dynamic);
+				
 				var commentCount = dynamic.get('commentCount');
 				commentCount = commentCount + 1;
 				dynamic.set('commentCount',commentCount);
-				dynamic.save();
+				return dynamic.save().then(function(dyc){
+					// console.log('objectId is ' + cmt.id);
+					return {"commentId":cmt.id};
+				},function(error){
+
+				});
+				
 			}, function (error) {
 		
 			});
