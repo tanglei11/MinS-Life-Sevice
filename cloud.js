@@ -178,7 +178,7 @@ AV.Cloud.define('saveCollect',function(request){
 AV.Cloud.define('deleteCollect',function(request){
 	console.log(request.params.dynamicId);
 	var query = new AV.Query(Collect) ;
-	query.equalTo('dynamicId', request.params.dynamicId) ;
+	query.equalTo('dynamicId', request.params.dynamicId);
 	query.first().then(function (data) {
 		data.destroy().then(function (success) {
 			// console.log('11111');
@@ -240,4 +240,36 @@ AV.Cloud.define('getComments',function(request){
   	}).catch(function(error) {
     	throw new AV.Cloud.Error('查询失败');
   });
+});
+
+//删除评论
+AV.Cloud.define('deleteComment',function(request){
+	var query = new AV.Query(Comment);
+	query.equalTo('objectId', request.params.commentId);
+	query.first().then(function (data) {
+		console.log(data);
+		data.destroy().then(function (success) {
+			// console.log('11111');
+    		// 删除成功
+    		if (request.params.commentType == 'dynamic') {
+				var query = new AV.Query(Dynamic) ;
+				query.equalTo('objectId',request.params.relationId);
+				query.first().then(function (dycData) {
+					var dynamic = dycData;
+					console.log('========' + dynamic);
+					var commentCount = dynamic.get('commentCount');
+					commentCount = commentCount - 1;
+					dynamic.set('commentCount',commentCount);
+					dynamic.save();
+				}, function (error) {
+			
+				});
+			}
+  		}, function (error) {
+  			// console.log('22222');
+    		// 删除失败
+  		});
+	}, function (error) {
+		
+	});
 });
