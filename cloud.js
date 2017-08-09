@@ -194,42 +194,29 @@ AV.Cloud.define('deleteCollect',function(request){
 
 //保存评论
 AV.Cloud.define('saveComment',function(request){
-	var comment = new Comment();
-	comment.set('relationId',request.params.relationId);
-	comment.set('commentUserId',request.params.commentUserId);
-	comment.set('commentUserName',request.params.commentUserName);
-	comment.set('commentUserProfileUrl',request.params.commentUserProfileUrl);
-	comment.set('beCommentUserId',request.params.beCommentUserId);
-	comment.set('beCommentUserName',request.params.beCommentUserName);
-	comment.set('commentContent',request.params.commentContent);
-	comment.set('commentType',request.params.commentType);
-	comment.set('commentStatus','0');
-	comment.save().then(function(cmt){
+	return new Promise(async(function(next, fail) {
+		var comment = new Comment();
+		comment.set('relationId',request.params.relationId);
+		comment.set('commentUserId',request.params.commentUserId);
+		comment.set('commentUserName',request.params.commentUserName);
+		comment.set('commentUserProfileUrl',request.params.commentUserProfileUrl);
+		comment.set('beCommentUserId',request.params.beCommentUserId);
+		comment.set('beCommentUserName',request.params.beCommentUserName);
+		comment.set('commentContent',request.params.commentContent);
+		comment.set('commentType',request.params.commentType);
+		comment.set('commentStatus','0');
+		_cmt = await(comment.save());
 		if (request.params.commentType == 'dynamic') {
-			console.log('进来了');
 			var query = new AV.Query(Dynamic) ;
 			query.equalTo('objectId',request.params.relationId);
-			query.first().then(function (data) {
-				var dynamic = data;
-				console.log('========' + dynamic);
-				
-				var commentCount = dynamic.get('commentCount');
-				commentCount = commentCount + 1;
-				dynamic.set('commentCount',commentCount);
-				return dynamic.save().then(function(dyc){
-					// console.log('objectId is ' + cmt.id);
-					return {"commentId":cmt.id};
-				},function(error){
-
-				});
-				
-			}, function (error) {
-		
-			});
+			dynamic = await(query.first());
+			var commentCount = dynamic.get('commentCount');
+			commentCount = commentCount + 1;
+			dynamic.set('commentCount',commentCount);
+			await(dynamic.save());
+			next({"commentId":_cmt.id});
 		}
-	},function(error){
-		console.error(error);
-	});
+	})) ;
 });
 
 //获取评论列表
