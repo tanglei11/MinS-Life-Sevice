@@ -198,8 +198,6 @@ AV.Cloud.define('saveComment',function(request){
 		var comment = new Comment();
 		comment.set('relationId',request.params.relationId);
 		comment.set('commentUserId',request.params.commentUserId);
-		comment.set('commentUserName',request.params.commentUserName);
-		comment.set('commentUserProfileUrl',request.params.commentUserProfileUrl);
 		comment.set('beCommentUserId',request.params.beCommentUserId);
 		comment.set('beCommentUserName',request.params.beCommentUserName);
 		comment.set('commentContent',request.params.commentContent);
@@ -221,19 +219,23 @@ AV.Cloud.define('saveComment',function(request){
 
 //获取评论列表
 AV.Cloud.define('getComments',function(request){
-	var relationQuery = new AV.Query(Comment);
-	relationQuery.equalTo('relationId',request.params.relationId);
-	var typeQuery = new AV.Query(Comment);
-	typeQuery.equalTo('commentType',request.params.commentType);
-	var query = AV.Query.and(relationQuery, typeQuery);
-	query.limit(request.params.limit);
-  	query.skip(request.params.skip);
-  	query.descending('createdAt');
-	return query.find().then(function(results) {
-    	return results;
-  	}).catch(function(error) {
-    	throw new AV.Cloud.Error('查询失败');
-  });
+	return new Promise(async(function(next, fail) {
+		var relationQuery = new AV.Query(Comment);
+		relationQuery.equalTo('relationId',request.params.relationId);
+		var typeQuery = new AV.Query(Comment);
+		typeQuery.equalTo('commentType',request.params.commentType);
+		var query = AV.Query.and(relationQuery, typeQuery);
+		query.limit(request.params.limit);
+	  	query.skip(request.params.skip);
+	  	query.descending('createdAt');
+	  	var _list = await(query.find()) ;
+		for(var i = 0; i < _list.length; i++) {
+			var _item = _list[i] ;
+			var _user = await(_get_userinfo(_item.get('commentUserId'))) ;
+			_item.set('user', {"objectId":_user.get("objectId"),"username":_user.get('username'),"nickname":_user.get('nickname'),"profileUrl":_user.get('profileUrl')}) ;
+		}
+		next(_list) ;
+	})) ;
 });
 
 //删除评论
