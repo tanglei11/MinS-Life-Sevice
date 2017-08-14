@@ -298,8 +298,13 @@ AV.Cloud.define('saveLike',function(request){
 
 //取消点赞
 AV.Cloud.define('cancelLike',function(request){
-	var query = new AV.Query(Like);
-	query.equalTo('objectId', request.params.likeId);
+	var relationQuery = new AV.Query(Like);
+	relationQuery.equalTo('relationId',request.params.relationId);
+	var userQuery = new AV.Query(Like);
+	userQuery.equalTo('userId',request.params.userId);
+	var typeQuery = new AV.Query(Like);
+	typeQuery.equalTo('likeType',request.params.likeType);
+	var query = AV.Query.and(relationQuery, userQuery,typeQuery);
 	query.first().then(function (data) {
 		console.log(data);
 		data.destroy().then(function (success) {
