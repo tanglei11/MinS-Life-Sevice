@@ -9,6 +9,7 @@ var Dynamic = AV.Object.extend('Dynamic');
 var User = AV.Object.extend('User');
 var Collect	= AV.Object.extend('Collect');
 var Comment = AV.Object.extend('Comment');
+var Like = AV.Object.extend('Like');
 
 async = require('asyncawait').async ;
 await = require('asyncawait').await ;
@@ -272,4 +273,81 @@ AV.Cloud.define('deleteComment',function(request){
 	}, function (error) {
 		
 	});
+});
+
+//保存点赞
+AV.Cloud.define('saveLike',function(request){
+	return new Promise(async(function(next, fail) {
+		var like = new Like();
+		like.set('relationId',request.params.relationId);
+		like.set('userId',request.params.userId);
+		like.set('likeType',request.params.likeType);
+		_lk = await(like.save());
+		if (request.params.likeType == 'dynamic') {
+			var query = new AV.Query(Dynamic) ;
+			query.equalTo('objectId',request.params.relationId);
+			dynamic = await(query.first());
+			var likeCount = dynamic.get('likeCount');
+			likeCount = likeCount + 1;
+			dynamic.set('likeCount',likeCount);
+			await(dynamic.save());
+			next({"likeId":_lk.id});
+		}
+	})) ;
+});
+
+//取消点赞
+AV.Cloud.define('cancelLike',function(request){
+	var query = new AV.Query(Like);
+	query.equalTo('objectId', request.params.likeId);
+	query.first().then(function (data) {
+		console.log(data);
+		data.destroy().then(function (success) {
+			// console.log('11111');
+    		// 删除成功
+    		if (request.params.likeType == 'dynamic') {
+				var query = new AV.Query(Dynamic);
+				query.equalTo('objectId',request.params.relationId);
+				query.first().then(function (dycData) {
+					var dynamic = dycData;
+					console.log('========' + dynamic);
+					var likeCount = dynamic.get('likeCount');
+					if (likeCount == 0) {
+
+					}else{
+						likeCount = likeCount - 1;
+					}
+					dynamic.set('likeCount',likeCount);
+					dynamic.save();
+				}, function (error) {
+			
+				});
+			}
+  		}, function (error) {
+  			// console.log('22222');
+    		// 删除失败
+  		});
+	}, function (error) {
+		
+	});
+});
+
+//判断当前用户是否赞过该动态
+AV.Cloud.define('getLikeStatus',function(request){
+	return new Promise(async(function(next, fail) {
+		var relationQuery = new AV.Query(Like);
+		relationQuery.equalTo('relationId',request.params.relationId);
+		var userQuery = new AV.Query(Like);
+		userQuery.equalTo('userId',request.params.userId);
+		var typeQuery = new AV.Query(Like);
+		typeQuery.equalTo('likeType',request.params.likeType);
+		var query = AV.Query.and(relationQuery, userQuery,typeQuery);
+		var _list = await(query.find());
+		if (_list.length > 0) {
+			next({"likeStatus":"1"});
+		}else{
+			next({"likeStatus":"0"});
+		}
+		
+	})) ;
 });
