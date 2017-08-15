@@ -452,3 +452,23 @@ AV.Cloud.define('saveMarket',function(request){
 		console.error(error);
 	});
 });
+
+//获取跳蚤信息
+AV.Cloud.define('getMarkets',function(request){
+	return new Promise(async(function(next, fail) {
+		var _query = new AV.Query(Market) ;
+		_query.limit(request.params.limit);
+  		_query.skip(request.params.skip);
+  		_query.descending('createdAt');
+		var _list = await(_query.find()) ;
+		for(var i = 0; i < _list.length; i++) {
+			var _item = _list[i] ;
+			var _user = await(_get_userinfo(_item.get('userId'))) ;
+			var is_collect = await(_get_isCollect(request.params.currectUserId,_item.get('objectId'),'market'));
+			// console.log(is_collect);
+			_item.set('user', {"objectId":_user.get("objectId"),"username":_user.get('username'),"nickname":_user.get('nickname'),"profileUrl":_user.get('profileUrl')}) ;
+			_item.set('isCollect',is_collect);
+		}
+		next(_list) ;
+	})) ;
+});
