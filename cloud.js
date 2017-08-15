@@ -10,11 +10,12 @@ var User = AV.Object.extend('User');
 var Collect	= AV.Object.extend('Collect');
 var Comment = AV.Object.extend('Comment');
 var Like = AV.Object.extend('Like');
+var Market = AV.Object.extend('Market');
 
 async = require('asyncawait').async ;
 await = require('asyncawait').await ;
 
-//---------------------------------------------------公共方法
+//------------------------------------------------------------------------------------------------------------------------公共方法
 
 //关联用户查询方法
 function _get_userinfo(userid) {
@@ -48,7 +49,7 @@ function _get_isCollect(currectUserId,dynamicId,collectType){
 	}));
 }
 
-//---------------------------------------------------云函数
+//------------------------------------------------------------------------------------------------------------------------首页模块
 
 AV.Cloud.define('saveBanner', function(request) {
 	var banner = new Banner();
@@ -122,6 +123,8 @@ AV.Cloud.define('getPlaces',function(request){
     throw new AV.Cloud.Error('查询失败');
   });
 });
+
+//------------------------------------------------------------------------------------------------------------------------动态模块
 
 //保存动态
 AV.Cloud.define('saveDynamic',function(request){
@@ -424,4 +427,28 @@ AV.Cloud.define('getLikeStatus',function(request){
 		}
 		
 	})) ;
+});
+
+//------------------------------------------------------------------------------------------------------------------------跳蚤模块
+
+//保存跳蚤信息
+
+AV.Cloud.define('saveMarket',function(request){
+	var market = new Market();
+	market.set('title',request.params.title);
+	market.set('content',request.params.content);
+	market.set('price',request.params.price);
+	market.set('imgs',request.params.imgs);
+	market.set('addressName',request.params.addressName);
+	market.set('address',request.params.address);
+	market.set('latitude',request.params.latitude);
+	market.set('longitude',request.params.longitude);
+	market.set('userId',request.params.userId);
+	market.set('likeCount',0);
+	market.set('commentCount',0);
+	market.save().then(function(dyn){
+		console.log('objectId is' + dyn.id);
+	},function(error){
+		console.error(error);
+	});
 });
