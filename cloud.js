@@ -466,7 +466,7 @@ AV.Cloud.define('getMarkets',function(request){
 			var _user = await(_get_userinfo(_item.get('userId'))) ;
 			var is_collect = await(_get_isCollect(request.params.currectUserId,_item.get('objectId'),'market'));
 			// console.log(is_collect);
-			_item.set('user', {"objectId":_user.get("objectId"),"username":_user.get('username'),"nickname":_user.get('nickname'),"profileUrl":_user.get('profileUrl')}) ;
+			_item.set('user', {"objectId":_user.get("objectId"),"username":_user.get('username'),"nickname":_user.get('nickname'),"profileUrl":_user.get('profileUrl'),"mobilePhoneNumber":_user.get('mobilePhoneNumber')}) ;
 			_item.set('isCollect',is_collect);
 		}
 		next(_list) ;
