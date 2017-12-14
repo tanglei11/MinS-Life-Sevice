@@ -286,7 +286,16 @@ AV.Cloud.define('saveComment',function(request){
 			dynamic.set('commentCount',commentCount);
 			await(dynamic.save());
 			next({"commentId":_cmt.id});
-		}
+		}else if (request.params.commentType == 'market') {
+			var query = new AV.Query(Market) ;
+			query.equalTo('objectId',request.params.relationId);
+			market = await(query.first());
+			var commentCount = market.get('commentCount');
+			commentCount = commentCount + 1;
+			market.set('commentCount',commentCount);
+			await(market.save());
+			next({"commentId":_cmt.id});
+		};
 	})) ;
 });
 
