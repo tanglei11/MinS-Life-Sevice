@@ -390,7 +390,16 @@ AV.Cloud.define('saveLike',function(request){
 			dynamic.set('likeCount',likeCount);
 			await(dynamic.save());
 			next({"likeId":_lk.id});
-		}
+		}else if (request.params.likeType == 'market') {
+			var query = new AV.Query(Market) ;
+			query.equalTo('objectId',request.params.relationId);
+			market = await(query.first());
+			var likeCount = market.get('likeCount');
+			likeCount = likeCount + 1;
+			market.set('likeCount',likeCount);
+			await(market.save());
+			next({"likeId":_lk.id});
+		};
 	})) ;
 });
 
@@ -425,7 +434,24 @@ AV.Cloud.define('cancelLike',function(request){
 				}, function (error) {
 			
 				});
-			}
+			}else if (request.params.likeType == 'market') {
+				var query = new AV.Query(Market);
+				query.equalTo('objectId',request.params.relationId);
+				query.first().then(function (dycData) {
+					var market = dycData;
+					console.log('========' + market);
+					var likeCount = market.get('likeCount');
+					if (likeCount == 0) {
+
+					}else{
+						likeCount = likeCount - 1;
+					}
+					market.set('likeCount',likeCount);
+					market.save();
+				}, function (error) {
+			
+				});
+			};
   		}, function (error) {
   			// console.log('22222');
     		// 删除失败
