@@ -346,7 +346,24 @@ AV.Cloud.define('deleteComment',function(request){
 				}, function (error) {
 			
 				});
-			}
+			}else if (request.params.commentType == 'market') {
+				var query = new AV.Query(Market) ;
+				query.equalTo('objectId',request.params.relationId);
+				query.first().then(function (dycData) {
+					var market = dycData;
+					console.log('========' + market);
+					var commentCount = market.get('commentCount');
+					if (commentCount == 0) {
+
+					}else{
+						commentCount = commentCount - 1;
+					}
+					market.set('commentCount',commentCount);
+					market.save();
+				}, function (error) {
+			
+				});
+			};
   		}, function (error) {
   			// console.log('22222');
     		// 删除失败
