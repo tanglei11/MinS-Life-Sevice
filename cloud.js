@@ -234,6 +234,75 @@ AV.Cloud.define('deleteDynamic',function(request){
 		});
 });
 
+//删除跳蚤信息
+AV.Cloud.define('deleteMarket',function(request){
+		//删除该动态
+		var marketQuery = new AV.Query(Market);
+		marketQuery.equalTo('objectId', request.params.marketId);
+		marketQuery.first().then(function (dynamicData) {
+			dynamicData.destroy().then(function (success) {
+				// console.log('11111');
+	    		// 删除成功
+	  		}, function (error) {
+	  			// console.log('22222');
+	    		// 删除失败
+	  		});
+		}, function (error) {
+		
+		});
+		//删除关联的收藏
+		var collectQuery = new AV.Query(Collect);
+		collectQuery.equalTo('dynamicId',request.params.marketId);
+		collectQuery.find().then(function (collectDatas) {
+			for (var i = 0; i < collectDatas.length; i++) {
+				var _collect = collectDatas[i];
+				_collect.destroy().then(function (success) {
+					// console.log('11111');
+		    		// 删除成功
+	  			}, function (error) {
+		  			// console.log('22222');
+		    		// 删除失败
+	  			});
+			}
+		}, function (error) {
+		
+		});
+		//删除关联的评论
+		var commentQuery = new AV.Query(Comment);
+		commentQuery.equalTo('relationId',request.params.marketId);
+		commentQuery.find().then(function (commentDatas) {
+			for (var i = 0; i < commentDatas.length; i++) {
+				var _comment = commentDatas[i];
+				_comment.destroy().then(function (success) {
+					// console.log('11111');
+		    		// 删除成功
+	  			}, function (error) {
+		  			// console.log('22222');
+		    		// 删除失败
+	  			});
+			}
+		}, function (error) {
+		
+		});
+		//删除关联的赞
+		var likeQuery = new AV.Query(Like);
+		likeQuery.equalTo('relationId',request.params.marketId);
+		likeQuery.find().then(function (likeDatas) {
+			for (var i = 0; i < likeDatas.length; i++) {
+				var _like = likeDatas[i];
+				_like.destroy().then(function (success) {
+					// console.log('11111');
+		    		// 删除成功
+	  			}, function (error) {
+		  			// console.log('22222');
+		    		// 删除失败
+	  			});
+			}
+		}, function (error) {
+		
+		});
+});
+
 //保存收藏
 AV.Cloud.define('saveCollect',function(request){
 	var collect = new Collect();
