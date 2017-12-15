@@ -167,7 +167,11 @@ AV.Cloud.define('saveDynamic',function(request){
 
 //获取动态
 AV.Cloud.define('getDynamics',function(request) {
-	_get_dynamics(request.params.limit,request.params.skip);
+	return new Promise(async(function(next, fail) {
+		var _list = await(_get_dynamics(request.params.limit,request.params.skip));
+		next(_list) ;
+	})) ;
+	
 	// return new Promise(async(function(next, fail) {
 	// 	var _query = new AV.Query(Dynamic) ;
 	// 	_query.limit(request.params.limit);
