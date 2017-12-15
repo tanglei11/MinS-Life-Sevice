@@ -50,11 +50,15 @@ function _get_isCollect(currectUserId,dynamicId,collectType){
 }
 
 //获取动态数据方法
-function _get_dynamics(limit,skip,currectUserId){
+function _get_dynamics(limit,skip,currectUserId,reloationId){
 	return new Promise(async(function(next, fail) {
-		var _query = new AV.Query(Dynamic) ;
-		_query.limit(limit);
-  		_query.skip(skip);
+		var _query = new AV.Query(Dynamic);
+		if (reloationId == null) {
+			_query.limit(limit);
+  			_query.skip(skip);
+		}else{
+			_query.equalTo('objectId', reloationId);
+		}
   		_query.descending('createdAt');
 		var _list = await(_query.find()) ;
 		for(var i = 0; i < _list.length; i++) {
@@ -64,17 +68,22 @@ function _get_dynamics(limit,skip,currectUserId){
 			// console.log(is_collect);
 			_item.set('user', {"objectId":_user.get("objectId"),"username":_user.get('username'),"nickname":_user.get('nickname'),"profileUrl":_user.get('profileUrl')}) ;
 			_item.set('isCollect',is_collect);
+			_item.set('type','dynamic');
 		}
 		next(_list) ;
 	})) ;
 }
 
 //获取跳蚤信息数据方法
-function _get_markets(limit,skip,currectUserId){
+function _get_markets(limit,skip,currectUserId,reloationId){
 	return new Promise(async(function(next, fail) {
 		var _query = new AV.Query(Market) ;
-		_query.limit(limit);
-  		_query.skip(skip);
+		if (reloationId == null) {
+			_query.limit(limit);
+  			_query.skip(skip);
+		}else{
+			_query.equalTo('objectId', reloationId);
+		}
   		_query.descending('createdAt');
 		var _list = await(_query.find()) ;
 		for(var i = 0; i < _list.length; i++) {
@@ -84,6 +93,7 @@ function _get_markets(limit,skip,currectUserId){
 			// console.log(is_collect);
 			_item.set('user', {"objectId":_user.get("objectId"),"username":_user.get('username'),"nickname":_user.get('nickname'),"profileUrl":_user.get('profileUrl'),"mobilePhoneNumber":_user.get('mobilePhoneNumber')}) ;
 			_item.set('isCollect',is_collect);
+			_item.set('type','market');
 		}
 		next(_list) ;
 	})) ;
@@ -188,7 +198,7 @@ AV.Cloud.define('saveDynamic',function(request){
 //获取动态
 AV.Cloud.define('getDynamics',function(request) {
 	return new Promise(async(function(next, fail) {
-		var _list = await(_get_dynamics(request.params.limit,request.params.skip,request.params.currectUserId));
+		var _list = await(_get_dynamics(request.params.limit,request.params.skip,request.params.currectUserId,null));
 		next(_list);
 	})) ;
 });
@@ -605,7 +615,7 @@ AV.Cloud.define('saveMarket',function(request){
 //获取跳蚤信息
 AV.Cloud.define('getMarkets',function(request){
 	return new Promise(async(function(next, fail) {
-		var _list = await(_get_markets(request.params.limit,request.params.skip,request.params.currectUserId));
+		var _list = await(_get_markets(request.params.limit,request.params.skip,request.params.currectUserId,null));
 		next(_list) ;
 	})) ;
 });
@@ -618,15 +628,21 @@ AV.Cloud.define('getMyCollects',function(request){
 		_query.limit(request.params.limit);
   		_query.skip(request.params.skip);
   		_query.descending('createdAt');
-		var _list = await(_query.find()) ;
+		var _list = await(_query.find());
+		var _collects = new Array();
 		for(var i = 0; i < _list.length; i++) {
 			var _item = _list[i] ;
-			var _user = await(_get_userinfo(_item.get('userId'))) ;
-			var is_collect = await(_get_isCollect(request.params.currectUserId,_item.get('objectId'),'market'));
-			// console.log(is_collect);
-			_item.set('user', {"objectId":_user.get("objectId"),"username":_user.get('username'),"nickname":_user.get('nickname'),"profileUrl":_user.get('profileUrl'),"mobilePhoneNumber":_user.get('mobilePhoneNumber')}) ;
-			_item.set('isCollect',is_collect);
+			if (_item.get("collectType") == "dynamic") {
+				//动态
+				var _dynamics = await(_get_dynamics(null,null,request.params.collectUserId,_item.get("dynamicId")));
+				_collects.push(_dynamics);
+			}else{
+				console.log(_item.get("dynamicId"));
+				//跳蚤市场
+				var _markets = await(_get_markets(null,null,request.params.collectUserId,_item.get("dynamicId")));
+				_collects.push(_markets);
+			}
 		}
-		next(_list) ;
+		next(_collects) ;
 	})) ;
 });
