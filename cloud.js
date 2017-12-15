@@ -50,7 +50,7 @@ function _get_isCollect(currectUserId,dynamicId,collectType){
 }
 
 //获取动态数据方法
-function _get_dynamics(limit,skip){
+function _get_dynamics(limit,skip,currectUserId){
 	return new Promise(async(function(next, fail) {
 		var _query = new AV.Query(Dynamic) ;
 		_query.limit(limit);
@@ -60,7 +60,7 @@ function _get_dynamics(limit,skip){
 		for(var i = 0; i < _list.length; i++) {
 			var _item = _list[i] ;
 			var _user = await(_get_userinfo(_item.get('userId'))) ;
-			var is_collect = await(_get_isCollect(request.params.currectUserId,_item.get('objectId'),'dynamic'));
+			var is_collect = await(_get_isCollect(currectUserId,_item.get('objectId'),'dynamic'));
 			// console.log(is_collect);
 			_item.set('user', {"objectId":_user.get("objectId"),"username":_user.get('username'),"nickname":_user.get('nickname'),"profileUrl":_user.get('profileUrl')}) ;
 			_item.set('isCollect',is_collect);
@@ -168,8 +168,8 @@ AV.Cloud.define('saveDynamic',function(request){
 //获取动态
 AV.Cloud.define('getDynamics',function(request) {
 	return new Promise(async(function(next, fail) {
-		var _list = await(_get_dynamics(request.params.limit,request.params.skip));
-		next(_list) ;
+		var _list = await(_get_dynamics(request.params.limit,request.params.skip,request.params.currectUserId));
+		next(_list);
 	})) ;
 	
 	// return new Promise(async(function(next, fail) {
