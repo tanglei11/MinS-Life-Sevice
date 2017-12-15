@@ -69,6 +69,26 @@ function _get_dynamics(limit,skip,currectUserId){
 	})) ;
 }
 
+//获取跳蚤信息数据方法
+function _get_markets(limit,skip,currectUserId){
+	return new Promise(async(function(next, fail) {
+		var _query = new AV.Query(Market) ;
+		_query.limit(limit);
+  		_query.skip(skip);
+  		_query.descending('createdAt');
+		var _list = await(_query.find()) ;
+		for(var i = 0; i < _list.length; i++) {
+			var _item = _list[i] ;
+			var _user = await(_get_userinfo(_item.get('userId'))) ;
+			var is_collect = await(_get_isCollect(currectUserId,_item.get('objectId'),'market'));
+			// console.log(is_collect);
+			_item.set('user', {"objectId":_user.get("objectId"),"username":_user.get('username'),"nickname":_user.get('nickname'),"profileUrl":_user.get('profileUrl'),"mobilePhoneNumber":_user.get('mobilePhoneNumber')}) ;
+			_item.set('isCollect',is_collect);
+		}
+		next(_list) ;
+	})) ;
+}
+
 //------------------------------------------------------------------------------------------------------------------------首页模块
 
 AV.Cloud.define('saveBanner', function(request) {
@@ -171,23 +191,6 @@ AV.Cloud.define('getDynamics',function(request) {
 		var _list = await(_get_dynamics(request.params.limit,request.params.skip,request.params.currectUserId));
 		next(_list);
 	})) ;
-	
-	// return new Promise(async(function(next, fail) {
-	// 	var _query = new AV.Query(Dynamic) ;
-	// 	_query.limit(request.params.limit);
- //  		_query.skip(request.params.skip);
- //  		_query.descending('createdAt');
-	// 	var _list = await(_query.find()) ;
-	// 	for(var i = 0; i < _list.length; i++) {
-	// 		var _item = _list[i] ;
-	// 		var _user = await(_get_userinfo(_item.get('userId'))) ;
-	// 		var is_collect = await(_get_isCollect(request.params.currectUserId,_item.get('objectId'),'dynamic'));
-	// 		// console.log(is_collect);
-	// 		_item.set('user', {"objectId":_user.get("objectId"),"username":_user.get('username'),"nickname":_user.get('nickname'),"profileUrl":_user.get('profileUrl')}) ;
-	// 		_item.set('isCollect',is_collect);
-	// 	}
-	// 	next(_list) ;
-	// })) ;
 });
 
 //删除动态
@@ -602,19 +605,7 @@ AV.Cloud.define('saveMarket',function(request){
 //获取跳蚤信息
 AV.Cloud.define('getMarkets',function(request){
 	return new Promise(async(function(next, fail) {
-		var _query = new AV.Query(Market) ;
-		_query.limit(request.params.limit);
-  		_query.skip(request.params.skip);
-  		_query.descending('createdAt');
-		var _list = await(_query.find()) ;
-		for(var i = 0; i < _list.length; i++) {
-			var _item = _list[i] ;
-			var _user = await(_get_userinfo(_item.get('userId'))) ;
-			var is_collect = await(_get_isCollect(request.params.currectUserId,_item.get('objectId'),'market'));
-			// console.log(is_collect);
-			_item.set('user', {"objectId":_user.get("objectId"),"username":_user.get('username'),"nickname":_user.get('nickname'),"profileUrl":_user.get('profileUrl'),"mobilePhoneNumber":_user.get('mobilePhoneNumber')}) ;
-			_item.set('isCollect',is_collect);
-		}
+		var _list = await(_get_markets(request.params.limit,request.params.skip,request.params.currectUserId));
 		next(_list) ;
 	})) ;
 });
